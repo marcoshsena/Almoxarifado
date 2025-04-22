@@ -10,10 +10,10 @@ class Item:
     quantidade: int
     preco: float
     tipo: str
-    data_validade: str  # Armazenado como 'AAAA-MM-DD' no banco
     marca: str = None
     unidade: str = None
     descricao: str = None
+    data_validade: str = None  # Armazenado como 'AAAA-MM-DD' no banco
 
 class ItemDAO:
     @staticmethod
@@ -29,7 +29,7 @@ class ItemDAO:
                 cursor = conexao.cursor()
                 cursor.execute(sql, (
                     item.nome, item.marca, item.quantidade, item.unidade,
-                    item.preco, item.tipo, item.descricao, item.data_validade
+                    item.preco, item.tipo, item.descricao, item.data_validade  # Pode ser None
                 ))
                 conexao.commit()
                 return True, "✅ Item cadastrado com sucesso!"
@@ -140,7 +140,12 @@ class ItemDAO:
 
     @staticmethod
     def itens_prox_validade(dias=30):
-        sql = "SELECT * FROM itens WHERE data_validade BETWEEN DATE('now') AND DATE('now', ?) ORDER BY data_validade"
+        sql = """
+        SELECT * FROM itens 
+        WHERE data_validade IS NOT NULL 
+        AND data_validade BETWEEN DATE('now') AND DATE('now', ?) 
+        ORDER BY data_validade
+        """
         conexao = criar_conexao()
         if conexao:
             try:

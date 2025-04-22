@@ -5,6 +5,7 @@ from utils.helpers import (
     converter_data_para_exibir, formatar_moeda,
     input_int, input_float
 )
+inicializar_banco()
 
 def exibir_menu():
     print("\n=== 🏭 MENU ALMOXARIFADO ===")
@@ -34,12 +35,15 @@ def cadastrar_item():
 
     descricao = input("Descrição (opcional): ").strip() or None
 
+    data_validade = None
     while True:
-        data_validade = input("Data de validade (DD/MM/AAAA): ").strip()
-        if validar_data(data_validade):
-            data_validade = converter_data_para_banco(data_validade)
+        data_input = input("Data de validade (DD/MM/AAAA - deixe em branco se não aplicável): ").strip()
+        if not data_input:
             break
-        print("❌ Formato inválido! Use DD/MM/AAAA.")
+        if validar_data(data_input):
+            data_validade = converter_data_para_banco(data_input)
+            break
+        print("❌ Formato inválido! Use DD/MM/AAAA ou deixe em branco.")
 
     novo_item = Item(
         id=None,
@@ -74,7 +78,7 @@ def listar_itens(itens=None):
         print(f"Preço unitário: {formatar_moeda(item[5])}")
         print(f"Tipo: {item[6]}")
         print(f"Descrição: {item[7] or 'N/A'}")
-        print(f"Data de validade: {converter_data_para_exibir(item[8])}")
+        print(f"Data de validade: {converter_data_para_exibir(item[8]) if item[8] else 'N/A'}")
     print("-" * 60)
     print(f"Total de itens: {len(itens)}")
 
@@ -109,14 +113,14 @@ def atualizar_item():
     descricao = input(f"Descrição [{item[7] or 'N/A'}]: ").strip() or item[7]
 
     while True:
-        data_input = input(f"Data de validade [{converter_data_para_exibir(item[8])}]: ").strip()
+        data_input = input(f"Data de validade [{converter_data_para_exibir(item[8]) if item[8] else 'N/A'}]: ").strip()
         if not data_input:
-            data_validade = item[8]
+            data_validade = item[8] if item[8] else None
             break
         if validar_data(data_input):
             data_validade = converter_data_para_banco(data_input)
             break
-        print("❌ Formato inválido! Use DD/MM/AAAA.")
+        print("❌ Formato inválido! Use DD/MM/AAAA ou deixe em branco.")
 
     item_atualizado = Item(
         id=item_id,

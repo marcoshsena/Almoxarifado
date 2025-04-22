@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+from .migrations import fazer_backup
 
 def criar_conexao():
     """Cria conexão com o banco SQLite."""
@@ -11,7 +12,7 @@ def criar_conexao():
         return None
 
 def criar_tabela_itens():
-    """Cria a tabela de itens com a estrutura correta"""
+    """Cria a tabela de itens se não existir"""
     sql = """
     CREATE TABLE IF NOT EXISTS itens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,32 +31,39 @@ def criar_tabela_itens():
         try:
             cursor = conexao.cursor()
 
-            # Verifica se a tabela já existe com estrutura diferente
-            cursor.execute("DROP TABLE IF EXISTS itens_backup")
-            cursor.execute("CREATE TABLE itens_backup AS SELECT * FROM itens")
+            # Verifica se a tabela existe
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='itens'")
+            if not cursor.fetchone():
+                print("ℹ️ Tabela 'itens' não encontrada. Criando nova tabela...")
+                cursor.execute(sql)
+                conexao.commit()
+                print("✅ Tabela 'itens' criada com sucesso!")
+            else:
+                print("ℹ️ Tabela 'itens' já existe.")
 
-            # Cria nova tabela com estrutura correta
-            cursor.execute("DROP TABLE IF EXISTS itens")
-            cursor.execute(sql)
-
-            # Migra os dados mantendo a ordem correta
-            cursor.execute("""
-                INSERT INTO itens (id, nome, marca, quantidade, unidade, preco, tipo, descricao, data_validade)
-                SELECT id, nome, marca, quantidade, unidade, preco, tipo, descricao, data_validade
-                FROM itens_backup
-            """)
-
-            conexao.commit()
-            print("✅ Estrutura da tabela corrigida com sucesso!")
         except Error as e:
-            print(f"❌ Erro ao corrigir estrutura: {e}")
-            conexao.rollback()
+            print(f"❌ Erro ao criar tabela: {e}")
         finally:
             conexao.close()
 
+    """Versão segura que faz backup antes de alterações"""
+    fazer_backup()  # Backup automático
+
+    conn = criar_conexao()
+    try:
+        cursor = conn.cursor()
+        # ... (restante do código original)
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro: {e}")
+    finally:
+        conn.close()
+
 def inicializar_banco():
-    """Garante que o banco e a tabela existam."""
+    """Garante que o banco está pronto para uso"""
+    print("\n🔍 Verificando estrutura do banco de dados...")
     criar_tabela_itens()
+    print("✅ Banco de dados verificado.\n")
 
 def corrigir_tipos_precos():
     """Corrige valores de preço armazenados como texto"""
