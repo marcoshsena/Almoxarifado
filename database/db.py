@@ -11,14 +11,19 @@ def criar_conexao():
         print(f"❌ Erro ao conectar ao banco: {e}")
         return None
 
+def criar_tabelas():
+    """Cria todas as tabelas necessárias"""
+    criar_tabela_itens()
+    criar_tabela_movimentacoes()
+
 def criar_tabela_itens():
-    """Cria a tabela de itens se não existir"""
     sql = """
     CREATE TABLE IF NOT EXISTS itens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
         marca TEXT,
         quantidade INTEGER NOT NULL,
+        saldo_inicial INTEGER NOT NULL,  -- NOVO CAMPO
         unidade TEXT,
         preco REAL NOT NULL,
         tipo TEXT NOT NULL,
@@ -58,6 +63,31 @@ def criar_tabela_itens():
         print(f"Erro: {e}")
     finally:
         conn.close()
+
+def criar_tabela_movimentacoes():
+    """Cria a tabela de movimentações"""
+    sql = """
+    CREATE TABLE IF NOT EXISTS movimentacoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_id INTEGER NOT NULL,
+        tipo TEXT NOT NULL CHECK (tipo IN ('entrada', 'saída')),
+        quantidade INTEGER NOT NULL,
+        data TEXT NOT NULL,
+        responsavel TEXT,
+        motivo TEXT,
+        FOREIGN KEY (item_id) REFERENCES itens (id)
+    );
+    """
+    conexao = criar_conexao()
+    if conexao:
+        try:
+            cursor = conexao.cursor()
+            cursor.execute(sql)
+            conexao.commit()
+        except Error as e:
+            print(f"❌ Erro ao criar tabela movimentacoes: {e}")
+        finally:
+            conexao.close()
 
 def inicializar_banco():
     """Garante que o banco está pronto para uso"""

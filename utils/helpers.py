@@ -19,13 +19,11 @@ def converter_data_para_exibir(data_str):
     return "N/A"
 
 def formatar_moeda(valor):
-    """Formata float para R$ 1.234,56 com tratamento de erro"""
+    """Formata valores monetários para o padrão R$ 1.234,56"""
     try:
-        # Garante que é float, mesmo se vier como string
-        valor_float = float(valor)
-        return f"R$ {valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"R$ {float(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     except (ValueError, TypeError):
-        return "R$ 0,00"  # Valor padrão em caso de erro
+        return "R$ 0,00"
 
 def input_int(mensagem):
     """Garante que o usuário digite um número inteiro."""
