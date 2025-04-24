@@ -1,0 +1,4 @@
+2025-04-24 14:40:52,214 - src.utils.logger - ERROR - Erro ao cadastrar item: 'ItemRepository' object has no attribute 'salvar'
+2025-04-24 14:41:06,724 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
+2025-04-24 14:45:00,203 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
+2025-04-24 14:48:13,187 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
