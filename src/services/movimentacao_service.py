@@ -65,19 +65,39 @@ class MovimentacaoService:
         data_inicio_db = converter_data_para_banco(data_inicio) if data_inicio else None
         data_fim_db = converter_data_para_banco(data_fim) if data_fim else None
 
+        # Busca movimentações do período
         movimentacoes = MovimentacaoRepository.listar_por_item(item_id, data_inicio_db, data_fim_db)
         item = ItemRepository.buscar_por_id(item_id)
 
         if not item:
             return [], 0, 0
 
-        # Calcula saldo inicial (antes de todas as movimentações)
-        saldo_inicial = item.quantidade
-        for mov in reversed(movimentacoes):
-            if mov.tipo == 'entrada':
-                saldo_inicial -= mov.quantidade  # Subtrai entradas
-            else:
-                saldo_inicial += mov.quantidade  # Soma saídas
+        # 1. Calcula saldo inicial: saldo antes do período filtrado
+        saldo_inicial = item.saldo_inicial  # Começa com o saldo inicial do item
 
-        saldo_final = item.quantidade
+        # Busca TODAS as movimentações anteriores ao período
+        movimentacoes_anteriores = MovimentacaoRepository.listar_por_item(
+            item_id,
+            data_fim=None,  # Todas até o início do período
+            data_inicio=None if not data_inicio else "0000-01-01"  # Data fictícia inicial
+        )
+
+        # Aplica apenas as movimentações anteriores
+        for mov in movimentacoes_anteriores:
+            if data_inicio and mov.data >= data_inicio_db:
+                continue  # Ignora movimentações dentro do período
+
+            if mov.tipo == 'entrada':
+                saldo_inicial += mov.quantidade
+            else:
+                saldo_inicial -= mov.quantidade
+
+        # 2. Calcula saldo final: saldo inicial + movimentações do período
+        saldo_final = saldo_inicial
+        for mov in movimentacoes:
+            if mov.tipo == 'entrada':
+                saldo_final += mov.quantidade
+            else:
+                saldo_final -= mov.quantidade
+
         return movimentacoes, saldo_inicial, saldo_final

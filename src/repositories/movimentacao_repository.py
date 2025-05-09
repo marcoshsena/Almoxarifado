@@ -4,7 +4,6 @@ from typing import List, Tuple, Optional
 import logging
 
 class MovimentacaoRepository:
-
     @staticmethod
     def registrar(movimentacao: Movimentacao) -> Tuple[bool, str]:
         """Registra uma movimentação e atualiza o estoque"""
@@ -38,14 +37,6 @@ class MovimentacaoRepository:
         except Exception as e:
             logging.error(f"Erro ao registrar movimentação: {e}")
             return False, f"Erro ao registrar movimentação: {e}"
-
-    from datetime import datetime
-from typing import List, Optional
-from src.models.movimentacao import Movimentacao
-from src.core.database import db_manager
-import logging
-
-class MovimentacaoRepository:
 
     @staticmethod
     def listar_todas(data_inicio: Optional[str] = None, data_fim: Optional[str] = None) -> List[Movimentacao]:

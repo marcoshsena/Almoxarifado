@@ -137,3 +137,33 @@ class ItemRepository:
         except Exception as e:
             logging.error(f"Erro ao listar itens: {e}")
             return []
+
+    @staticmethod
+    def itens_prox_validade(dias: int) -> List[Item]:
+        """Busca itens que expiram dentro de 'dias' dias"""
+        sql = """
+        SELECT * FROM itens 
+        WHERE data_validade BETWEEN date('now') AND date('now', ? || ' days')
+        ORDER BY data_validade
+        """
+        try:
+            with db_manager.criar_conexao() as conn:
+                cursor = conn.cursor()
+                cursor.execute(sql, (str(dias),))
+                return [ItemRepository._row_to_item(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logging.error(f"Erro ao buscar itens próximos da validade: {e}")
+            return []
+
+    @staticmethod
+    def itens_vencidos() -> List[Item]:
+        """Busca itens com data de validade expirada"""
+        sql = "SELECT * FROM itens WHERE data_validade < date('now') AND quantidade > 0"
+        try:
+            with db_manager.criar_conexao() as conn:
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                return [ItemRepository._row_to_item(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logging.error(f"Erro ao buscar itens vencidos: {e}")
+            return []

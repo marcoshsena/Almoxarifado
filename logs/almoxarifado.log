@@ -2,3 +2,6 @@
 2025-04-24 14:41:06,724 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
 2025-04-24 14:45:00,203 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
 2025-04-24 14:48:13,187 - src.utils.logger - ERROR - Erro ao listar itens: 'ItemRepository' object has no attribute 'listar_todos'
+2025-05-08 21:28:54,306 - root - INFO - Baixa automática: 2 itens processados
+2025-05-08 21:28:54,306 - root - INFO - Escova - Movimentação registrada com sucesso
+2025-05-08 21:28:54,306 - root - INFO - Prilocaína - Movimentação registrada com sucesso

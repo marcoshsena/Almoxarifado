@@ -1,6 +1,9 @@
+from datetime import datetime
 from typing import List, Tuple, Optional
 from src.models.item import Item
 from src.repositories.item_repository import ItemRepository
+from src.models.movimentacao import Movimentacao
+from src.repositories.movimentacao_repository import MovimentacaoRepository
 from src.utils.logger import logger
 
 class ItemService:
@@ -88,3 +91,37 @@ class ItemService:
             return any(item.nome.lower() == nome.lower() for item in itens)
         except Exception:
             return False
+
+    def itens_prox_validade(self, dias: int) -> List[Item]:
+        """Retorna itens que vencem em 'dias' dias"""
+        try:
+            return self.repository.itens_prox_validade(dias)
+        except Exception as e:
+            logger.error(f"Erro ao buscar itens próximos da validade: {e}")
+            return []
+
+    def processar_vencimentos(self):
+        """Realiza baixa automática de itens vencidos"""
+        itens_vencidos = self.repository.itens_vencidos()
+        resultados = []
+
+        for item in itens_vencidos:
+            mov = Movimentacao(
+                item_id=item.id,
+                tipo='saída',
+                quantidade=item.quantidade,
+                data=datetime.now().isoformat(),
+                responsavel='SISTEMA',
+                motivo='Baixa automática - Item vencido'
+            )
+
+            sucesso, msg = MovimentacaoRepository.registrar(mov)
+
+            resultados.append({
+                'item': item.nome,
+                'quantidade': item.quantidade,
+                'sucesso': sucesso,
+                'mensagem': msg
+            })
+
+        return resultados
